@@ -3,7 +3,7 @@ select count(*) from incubyte.assessment_dataset
 -- '450000'
 -- This count check is a data load validation, The total count of row matches the given assesment_dataset.csv
 
-select COUNT(*), extract(year from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) as Year
+select count(*), extract(year from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) as Year
 from incubyte.assessment_dataset
 group by 2
 
@@ -13,7 +13,7 @@ group by 2
 -- Total Dimensions: There are 8 Dimensions. TransactionID,CustomerID,TransactionDate,TransactionAmount,PaymentMethod,Quantity,DiscountPercent,City,StoreType,CustomerAge,CustomerGender,LoyaltyPoints,ProductName,Region,Returned, FeedbackScore, ShippingCost, DeliveryTimeDays, IsPromotional
 -- Total Measures: There are 7 Measures. TransactionAmount,PaymentMethod,Quantity,DiscountPercent,City,StoreType,CustomerAge,CustomerGender,LoyaltyPoints,ProductName, Region, Returned,FeedbackScore,ShippingCost, DeliveryTimeDays
 -- Granularity: The granularity of the data is at tranasction level.
--- A simple drill down in the dataset would be as shown below : Region > City > CustomerID > TransactionID
+-- A simple drill down in the dataset would be as shown: Region > City > CustomerID > TransactionID
 
 
 select 
@@ -24,6 +24,7 @@ sum(TransactionAmount) as 'Total Transaction'
 from incubyte.assessment_dataset
 group by 1,2
 order by 1
+
 -- Month of december have low number of transactions, with less than 50% when compared to the other months.
 
 select Month, year, PreviousMonthTotalTransaction , TotalTransaction,
@@ -42,7 +43,6 @@ group by 1,2
 order by 1) a
 
 -- Month over month transaction by city
-
 select Month, year, City,PreviousMonthTotalTransaction , TotalTransaction,
 coalesce(cast(((PreviousMonthTotalTransaction - TotalTransaction)/PreviousMonthTotalTransaction) *100 as decimal (5,2)),0)as PercentMonthlyChange
 From (
@@ -73,7 +73,7 @@ From (
 select
 extract(month from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) as Month,
 extract(year from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) as Year,
-REgion,
+Region,
 count(TransactionID) as 'Number Of Transaction',
 sum(TransactionAmount) as TotalTransaction,
 coalesce(lag(sum(TransactionAmount)) over (partition by Region order by extract(month from STR_TO_DATE(TransactionDate,'%m/%d/%Y'))),0) as PreviousMonthTotalTransaction
