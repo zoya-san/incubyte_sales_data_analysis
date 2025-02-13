@@ -90,7 +90,7 @@ order by 2 desc
 -- South region has the Highest number of TotalTransaction
 
 
--- Retrieve the top 10 most returned products based on transaction count  
+-- Top 10 most returned products based on transaction count  
 -- This helps identify products with high return rates
 select extract(month from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) as Month,
 extract(year from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) as Year, ProductName, count(TransactionID) as  TotalReturns
@@ -101,8 +101,50 @@ order by 4 desc
 limit 10
 
 -- Average shipping days took for each product and store type
-select avg(DeliveryTimeDays) as AvgerageShiptmentDays, ProductName, StoreType
+select 
+avg(DeliveryTimeDays) as AvgerageShiptmentDays, ProductName, StoreType
 from incubyte.assessment_dataset
 group by 2,3
+
+-- Average shipping days across months and year
+select 
+extract(month from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) as Month,
+extract(year from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) as Year,
+avg(DeliveryTimeDays) as AvgerageShiptmentDays
+from incubyte.assessment_dataset
+group by 1,2
+order by 2,1
+
+
+-- Top 3 products based on transaction count and total transaction
+select
+extract(month from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) as Month,
+extract(year from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) as Year,
+count(TransactionID) as TransactionCount, sum(TransactionAmount) as TotalTransaction,
+ProductName
+from incubyte.assessment_dataset
+where extract(month from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) is not null
+group by 1,2,5
+order by 3 desc
+limit 3
+
+-- This shows that top products based on transaction count are  Notebook, T-Shirt and Sofa 
+
+-- Month over month transaction For top products
+select Month, year, ProductName,  TotalTransaction, PreviousMonthTotalTransaction,
+coalesce(cast(((PreviousMonthTotalTransaction - TotalTransaction)/PreviousMonthTotalTransaction) *100 as decimal (5,2)),0)as PercentMonthlyChange
+From (
+select
+extract(month from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) as Month,
+extract(year from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) as Year,
+ProductName,
+count(TransactionID) as 'Number Of Transaction',
+sum(TransactionAmount) as TotalTransaction,
+coalesce(lag(sum(TransactionAmount)) over (partition by ProductName order by extract(month from STR_TO_DATE(TransactionDate,'%m/%d/%Y'))),0) as PreviousMonthTotalTransaction
+from incubyte.assessment_dataset
+where extract(year from STR_TO_DATE(TransactionDate,'%m/%d/%Y'))= 2022
+group by 1,2, 3
+order by 1,3,4) a
+
 
 
