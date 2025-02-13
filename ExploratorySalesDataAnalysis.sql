@@ -177,5 +177,21 @@ StoreType,
 sum(TransactionAmount) as TotalTransactionAmount
 from incubyte.assessment_dataset
 group by 1
-
 -- The difference is quite minimal: In-Store transaction very slightly exceeds the online transactions
+
+
+
+-- Online vs in store . Which has most returns
+select
+StoreType, count(case when Returned = 'yes' then 1 end) as ReturnCount
+from incubyte.assessment_dataset
+group by 1
+-- The difference again is minimal in this case. Online returns are slightly higher than In-store returns.
+
+
+-- Product returns based on storetype
+select
+ProductName, StoreType, count(case when Returned = 'yes' then 1 end) as ReturnCount
+from incubyte.assessment_dataset
+group by 1,2
+order by 2
