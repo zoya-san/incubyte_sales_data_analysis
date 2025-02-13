@@ -148,3 +148,34 @@ order by 1,3,4) a
 
 
 
+-- return rate by shipping cost
+select
+ProductName,
+avg(ShippingCost) as AvgerageShiptmentCost, 
+count(case when Returned ='yes' then 1 end) as ReturnCount
+from incubyte.assessment_dataset
+group by 1
+
+-- products with higher shipping costs, like sofa and laptop, do not necessarily have higher return rates, 
+-- but, notebook has a moderate shipping cost but the highest return count.
+
+
+-- The total number of times the product was returned based on the Avgerage Shiptment Days
+select
+ProductName,
+avg(DeliveryTimeDays) as AvgerageShiptmentDays, 
+count(case when Returned ='yes' then 1 end) as ReturnCount
+from incubyte.assessment_dataset
+group by 1
+-- with longer shipment times, like Sofa, do not necessarily have higher return rates,
+-- while Notebook stands out with the highest returns despite moderate delivery times.
+
+
+-- Compare Total Transaction Amount based on store type
+select 
+StoreType,
+sum(TransactionAmount) as TotalTransactionAmount
+from incubyte.assessment_dataset
+group by 1
+
+-- The difference is quite minimal: In-Store transaction very slightly exceeds the online transactions
