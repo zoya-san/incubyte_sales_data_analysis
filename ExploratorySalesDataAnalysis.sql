@@ -20,19 +20,20 @@ select
 extract(month from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) as Month,
 extract(year from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) as Year,
 count(TransactionID) as 'Number Of Transaction',
-
 sum(TransactionAmount) as 'Total Transaction'
 from incubyte.assessment_dataset
 group by 1,2
 order by 1
+-- Month of december have low number of transactions, with less than 50% when compared to the other months.
 
--- Month of december have low number of trnasactions, with only 
-select * from(
-select 
+select
 extract(month from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) as Month,
 extract(year from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) as Year,
 count(TransactionID) as 'Number Of Transaction',
-sum(TransactionAmount) as 'Total Transaction'
+sum(TransactionAmount) as 'Total Transaction',
+lag(sum(TransactionAmount)) over (order by extract(month from STR_TO_DATE(TransactionDate,'%m/%d/%Y'))) as 'Previous Month Total Transaction'
+-- lag(sum(TransactionAmount)) over (order by extract(month from STR_TO_DATE(TransactionDate,'%m/%d/%Y'))) - sum(TransactionAmount)) as 'Monthly Difference'
 from incubyte.assessment_dataset
+where extract(year from STR_TO_DATE(TransactionDate,'%m/%d/%Y'))= 2022
 group by 1,2
-order by 1) a
+order by 1
