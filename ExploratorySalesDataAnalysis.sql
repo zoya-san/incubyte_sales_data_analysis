@@ -36,7 +36,6 @@ extract(year from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) as Year,
 count(TransactionID) as 'Number Of Transaction',
 sum(TransactionAmount) as TotalTransaction,
 lag(sum(TransactionAmount)) over (order by extract(month from STR_TO_DATE(TransactionDate,'%m/%d/%Y'))) as PreviousMonthTotalTransaction
--- lag(sum(TransactionAmount)) over (order by extract(month from STR_TO_DATE(TransactionDate,'%m/%d/%Y'))) - sum(TransactionAmount)) as 'Monthly Difference'
 from incubyte.assessment_dataset
 where extract(year from STR_TO_DATE(TransactionDate,'%m/%d/%Y'))= 2022
 group by 1,2
@@ -53,7 +52,6 @@ City,
 count(TransactionID) as 'Number Of Transaction',
 sum(TransactionAmount) as TotalTransaction,
 coalesce(lag(sum(TransactionAmount)) over (partition by City order by extract(month from STR_TO_DATE(TransactionDate,'%m/%d/%Y'))),0) as PreviousMonthTotalTransaction
--- lag(sum(TransactionAmount)) over (order by extract(month from STR_TO_DATE(TransactionDate,'%m/%d/%Y'))) - sum(TransactionAmount)) as 'Monthly Difference'
 from incubyte.assessment_dataset
 where extract(year from STR_TO_DATE(TransactionDate,'%m/%d/%Y'))= 2022
 group by 1,2, 3
@@ -90,3 +88,21 @@ group by 1
 order by 2 desc
 
 -- South region has the Highest number of TotalTransaction
+
+
+-- Retrieve the top 10 most returned products based on transaction count  
+-- This helps identify products with high return rates
+select extract(month from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) as Month,
+extract(year from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) as Year, ProductName, count(TransactionID) as  TotalReturns
+from incubyte.assessment_dataset
+where Returned = 'Yes'
+group by 1,2,3
+order by 4 desc
+limit 10
+
+-- Average shipping days took for each product and store type
+select avg(DeliveryTimeDays) as AvgerageShiptmentDays, ProductName, StoreType
+from incubyte.assessment_dataset
+group by 2,3
+
+
