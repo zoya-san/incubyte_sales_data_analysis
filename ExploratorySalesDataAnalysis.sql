@@ -63,6 +63,7 @@ from incubyte.assessment_dataset
 group by 1
 order by 2 desc
 limit 10
+-- Kolkata has the Highest number of TotalTransaction
 
 -- Month over month transaction by Region
 select Month, year, Region,  TotalTransaction, PreviousMonthTotalTransaction,
@@ -116,19 +117,30 @@ group by 1,2
 order by 2,1
 
 
--- Top 3 products based on transaction count and total transaction
+-- Top 3 products based on transaction count 
 select
 extract(month from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) as Month,
 extract(year from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) as Year,
-count(TransactionID) as TransactionCount, sum(TransactionAmount) as TotalTransaction,
+count(TransactionID) as TransactionCount, 
 ProductName
 from incubyte.assessment_dataset
 where extract(month from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) is not null
-group by 1,2,5
+group by 1,2,4
 order by 3 desc
 limit 3
-
 -- This shows that top products based on transaction count are  Notebook, T-Shirt and Sofa 
+
+-- Top 3 products based on sum of total transaction
+select
+ProductName,
+sum(TransactionAmount) as TotalTransaction
+from incubyte.assessment_dataset
+where extract(month from STR_TO_DATE(TransactionDate,'%m/%d/%Y')) is not null
+group by 1
+order by 2 desc
+limit 3
+-- This shows that top products based on sum of transaction amounts are Laptop,  Sofa  and T-Shirt
+
 
 -- Month over month transaction For top products
 select Month, year, ProductName,  TotalTransaction, PreviousMonthTotalTransaction,
